@@ -13,9 +13,23 @@
 
     <button id="btnSorteio" onclick="realizarSorteio()">Realizar Sorteio Agora</button>
     
-    <!-- Novo botão para baixar o CSV (começa escondido) -->
+    <!-- Botão para baixar o CSV (começa escondido) -->
     <button id="btnBaixar" onclick="baixarCSV()" style="display: none; background-color: #3498db; margin-top: -15px;">Baixar Arquivo CSV</button>
 
+    <h2 class="titulo-tabela" style="display: none;">Vagas PCD</h2>
+    <table id="tabelaResultadoPCD">
+        <thead>
+            <tr>
+                <th>Vaga PCD</th>
+                <th>Apartamento Sorteado</th>
+            </tr>
+        </thead>
+        <tbody id="corpoTabelaPCD">
+            <!-- O resultado PCD vai aparecer aqui dinamicamente -->
+        </tbody>
+    </table>
+
+    <h2 class="titulo-tabela" style="display: none; margin-top: 30px;">Vagas Gerais</h2>
     <table id="tabelaResultado">
         <thead>
             <tr>
@@ -24,7 +38,7 @@
             </tr>
         </thead>
         <tbody id="corpoTabela">
-            <!-- O resultado vai aparecer aqui dinamicamente -->
+            <!-- O resultado geral vai aparecer aqui dinamicamente -->
         </tbody>
     </table>
 

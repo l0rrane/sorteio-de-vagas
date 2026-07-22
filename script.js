@@ -1,4 +1,4 @@
-// Listas de vagas e apartamentos
+// Listas de vagas e apartamentos GERAIS
 const vagas = [
     "VAGA 3", "VAGA 4", "VAGA 5", "VAGA 6", "VAGA 7", "VAGA 9", "VAGA 10", 
     "VAGA 11", "VAGA 12", "VAGA 13", "VAGA 14", "VAGA 15", "VAGA 16", "VAGA 17", 
@@ -38,8 +38,13 @@ const apartamentos = [
     "AP-0303", "AP-0608", "AP-1003", "AP-1006", "AP-0406", "AP-1204", "AP-0906"
 ];
 
-// Variável para guardar o resultado e o CSV poder usar depois
-let resultadoFinalDoSorteio = [];
+// Listas de vagas e apartamentos PCD
+const vagasPCD = ["VAGA 63", "VAGA 64", "VAGA 70", "VAGA 71"];
+const apartamentosPCD = ["AP-0018", "AP-0001", "AP-0011", "AP-0004"];
+
+// Variáveis para guardar os resultados e o CSV poder usar depois
+let resultadoFinalGeral = [];
+let resultadoFinalPCD = [];
 
 function realizarSorteio() {
     const vagaFixa = "VAGA 82";
@@ -48,6 +53,7 @@ function realizarSorteio() {
     // Esconde o botão de baixar caso a pessoa rode o sorteio de novo
     document.getElementById('btnBaixar').style.display = 'none';
 
+    // === SORTEIO GERAL ===
     let vagasDisponiveis = vagas.filter(v => v !== vagaFixa);
     let aptosDisponiveis = apartamentos.filter(a => a !== aptoFixo);
 
@@ -56,32 +62,48 @@ function realizarSorteio() {
         [aptosDisponiveis[i], aptosDisponiveis[j]] = [aptosDisponiveis[j], aptosDisponiveis[i]];
     }
 
-    let resultado = [];
-
+    let resultadoGeral = [];
     for (let i = 0; i < vagasDisponiveis.length; i++) {
-        resultado.push({
+        resultadoGeral.push({
             vaga: vagasDisponiveis[i],
             apto: aptosDisponiveis[i] || "--- LIVRE ---"
         });
     }
 
-    resultado.push({ vaga: vagaFixa, apto: aptoFixo });
+    resultadoGeral.push({ vaga: vagaFixa, apto: aptoFixo });
+    resultadoGeral.sort((a, b) => parseInt(a.vaga.replace("VAGA ", "")) - parseInt(b.vaga.replace("VAGA ", "")));
 
-    resultado.sort((a, b) => {
-        let numA = parseInt(a.vaga.replace("VAGA ", ""));
-        let numB = parseInt(b.vaga.replace("VAGA ", ""));
-        return numA - numB;
-    });
+    // === SORTEIO PCD ===
+    let aptosPCDDisponiveis = [...apartamentosPCD];
+    for (let i = aptosPCDDisponiveis.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [aptosPCDDisponiveis[i], aptosPCDDisponiveis[j]] = [aptosPCDDisponiveis[j], aptosPCDDisponiveis[i]];
+    }
 
-    // Salva na variável global para o botão CSV conseguir ler depois
-    resultadoFinalDoSorteio = resultado;
+    let resultadoPCD = [];
+    for (let i = 0; i < vagasPCD.length; i++) {
+        resultadoPCD.push({
+            vaga: vagasPCD[i],
+            apto: aptosPCDDisponiveis[i] || "--- LIVRE ---"
+        });
+    }
+    
+    resultadoPCD.sort((a, b) => parseInt(a.vaga.replace("VAGA ", "")) - parseInt(b.vaga.replace("VAGA ", "")));
 
-    animarSorteio(resultado);
+    // Salva nas variáveis globais
+    resultadoFinalGeral = resultadoGeral;
+    resultadoFinalPCD = resultadoPCD;
+
+    animarSorteio(resultadoGeral, resultadoPCD);
 }
 
-function animarSorteio(dadosFinais) {
+function animarSorteio(dadosGerais, dadosPCD) {
     const corpoTabela = document.getElementById('corpoTabela');
+    const corpoTabelaPCD = document.getElementById('corpoTabelaPCD');
     const tabela = document.getElementById('tabelaResultado');
+    const tabelaPCD = document.getElementById('tabelaResultadoPCD');
+    const titulos = document.querySelectorAll('.titulo-tabela');
+    
     const btnSorteio = document.getElementById('btnSorteio');
     const btnBaixar = document.getElementById('btnBaixar');
     
@@ -91,16 +113,35 @@ function animarSorteio(dadosFinais) {
     btnSorteio.style.cursor = "wait";
 
     corpoTabela.innerHTML = ""; 
+    corpoTabelaPCD.innerHTML = "";
+    
     tabela.style.display = 'table'; 
+    tabelaPCD.style.display = 'table';
+    titulos.forEach(titulo => titulo.style.display = 'block');
 
-    dadosFinais.forEach(item => {
+    // Preenche a tabela PCD com o efeito de giro
+    dadosPCD.forEach(item => {
         const tr = document.createElement('tr');
-        
         const tdVaga = document.createElement('td');
         tdVaga.textContent = item.vaga;
         
         const tdApto = document.createElement('td');
-        tdApto.className = "celula-animada"; 
+        tdApto.className = "celula-animada-pcd"; 
+        tdApto.textContent = "Girando...";
+        
+        tr.appendChild(tdVaga);
+        tr.appendChild(tdApto);
+        corpoTabelaPCD.appendChild(tr);
+    });
+
+    // Preenche a tabela Geral com o efeito de giro
+    dadosGerais.forEach(item => {
+        const tr = document.createElement('tr');
+        const tdVaga = document.createElement('td');
+        tdVaga.textContent = item.vaga;
+        
+        const tdApto = document.createElement('td');
+        tdApto.className = "celula-animada-geral"; 
         tdApto.textContent = "Girando...";
         
         tr.appendChild(tdVaga);
@@ -108,16 +149,22 @@ function animarSorteio(dadosFinais) {
         corpoTabela.appendChild(tr);
     });
 
-    const celulas = document.querySelectorAll('.celula-animada');
+    const celulasPCD = document.querySelectorAll('.celula-animada-pcd');
+    const celulasGerais = document.querySelectorAll('.celula-animada-geral');
     
     let tempoDecorrido = 0;
     const tempoTotal = 3000; 
     const velocidade = 50; 
 
     const roleta = setInterval(() => {
-        celulas.forEach(celula => {
-            const aptoAleatorio = apartamentos[Math.floor(Math.random() * apartamentos.length)];
-            celula.textContent = aptoAleatorio;
+        // Animação PCD
+        celulasPCD.forEach(celula => {
+            celula.textContent = apartamentosPCD[Math.floor(Math.random() * apartamentosPCD.length)];
+        });
+        
+        // Animação Geral
+        celulasGerais.forEach(celula => {
+            celula.textContent = apartamentos[Math.floor(Math.random() * apartamentos.length)];
         });
 
         tempoDecorrido += velocidade;
@@ -125,8 +172,14 @@ function animarSorteio(dadosFinais) {
         if (tempoDecorrido >= tempoTotal) {
             clearInterval(roleta); 
             
-            celulas.forEach((celula, index) => {
-                celula.textContent = dadosFinais[index].apto;
+            // Fixa os resultados finais PCD
+            celulasPCD.forEach((celula, index) => {
+                celula.textContent = dadosPCD[index].apto;
+            });
+
+            // Fixa os resultados finais Gerais
+            celulasGerais.forEach((celula, index) => {
+                celula.textContent = dadosGerais[index].apto;
             });
             
             btnSorteio.disabled = false;
@@ -134,7 +187,6 @@ function animarSorteio(dadosFinais) {
             btnSorteio.style.backgroundColor = "#27ae60"; 
             btnSorteio.style.cursor = "pointer";
             
-            // Aqui fazemos o botão de Baixar CSV aparecer
             btnBaixar.style.display = 'block';
         }
     }, velocidade);
@@ -142,25 +194,27 @@ function animarSorteio(dadosFinais) {
 
 // === NOVA FUNÇÃO PARA GERAR E BAIXAR O CSV ===
 function baixarCSV() {
-    // Cabeçalho da planilha. Usamos ponto e vírgula (;) porque o Excel no Brasil entende isso como separador de colunas
-    let conteudoCSV = "Vaga;Apartamento Sorteado\n";
+    // Cabeçalho da planilha agora inclui a categoria.
+    let conteudoCSV = "Categoria;Vaga;Apartamento Sorteado\n";
 
-    // Adiciona as linhas percorrendo a nossa lista final salva
-    resultadoFinalDoSorteio.forEach(linha => {
-        conteudoCSV += `${linha.vaga};${linha.apto}\n`;
+    // Adiciona as vagas PCD
+    resultadoFinalPCD.forEach(linha => {
+        conteudoCSV += `PCD;${linha.vaga};${linha.apto}\n`;
     });
 
-    // Cria o arquivo virtual na memória (O BOM \uFEFF garante que acentos e formatação fiquem perfeitos)
+    // Adiciona as vagas gerais
+    resultadoFinalGeral.forEach(linha => {
+        conteudoCSV += `Geral;${linha.vaga};${linha.apto}\n`;
+    });
+
     const blob = new Blob(["\uFEFF" + conteudoCSV], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     
-    // Cria um link invisível e clica nele automaticamente para forçar o download
     const link = document.createElement("a");
     link.href = url;
-    link.download = "Resultado_Sorteio_Vagas_.csv";
+    link.download = "Resultado_Sorteio_Vagas_Viva_Vista.csv";
     document.body.appendChild(link);
     link.click();
     
-    // Limpa o link criado
     document.body.removeChild(link);
 }

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteio Viva Vista Ferraz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>SORTEIO DE VAGAS</h1>
+    <p class="subtitle">VIVA VISTA FERRAZ </p>
+
+    <button id="btnSorteio" onclick="realizarSorteio()">Realizar Sorteio Agora</button>
+    
+    <!-- Novo botão para baixar o CSV (começa escondido) -->
+    <button id="btnBaixar" onclick="baixarCSV()" style="display: none; background-color: #3498db; margin-top: -15px;">Baixar Arquivo CSV</button>
+
+    <table id="tabelaResultado">
+        <thead>
+            <tr>
+                <th>Vaga</th>
+                <th>Apartamento Sorteado</th>
+            </tr>
+        </thead>
+        <tbody id="corpoTabela">
+            <!-- O resultado vai aparecer aqui dinamicamente -->
+        </tbody>
+    </table>
+
+    <script src="script.js"></script>
+</body>
+</html>

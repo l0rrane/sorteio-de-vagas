@@ -193,9 +193,13 @@ function animarSorteio(dadosGerais, dadosPCD) {
 }
 
 // === NOVA FUNÇÃO PARA GERAR E BAIXAR O CSV ===
+// === NOVA FUNÇÃO PARA GERAR E BAIXAR O CSV ===
 function baixarCSV() {
-    // Cabeçalho da planilha agora inclui a categoria.
-    let conteudoCSV = "Categoria;Vaga;Apartamento Sorteado\n";
+    // Adiciona o título com a vigência na primeira linha do Excel/CSV
+    let conteudoCSV = "SORTEIO (VIGENCIA DE 17 DE AGOSTO DE 2026 A 16 DE AGOSTO DE 2027)\n\n";
+    
+    // Cabeçalho das colunas
+    conteudoCSV += "Categoria;Vaga;Apartamento Sorteado\n";
 
     // Adiciona as vagas PCD
     resultadoFinalPCD.forEach(linha => {
@@ -207,6 +211,7 @@ function baixarCSV() {
         conteudoCSV += `Geral;${linha.vaga};${linha.apto}\n`;
     });
 
+    // Gera e baixa o arquivo
     const blob = new Blob(["\uFEFF" + conteudoCSV], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     

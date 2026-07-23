@@ -42,7 +42,7 @@ const apartamentos = [
 const vagasPCD = ["VAGA 63", "VAGA 64", "VAGA 70", "VAGA 71"];
 const apartamentosPCD = ["AP-0018", "AP-0001", "AP-0011", "AP-0004"];
 
-// Variáveis para guardar os resultados e o CSV poder usar depois
+// Variáveis para guardar os resultados
 let resultadoFinalGeral = [];
 let resultadoFinalPCD = [];
 
@@ -50,7 +50,6 @@ function realizarSorteio() {
     const vagaFixa = "VAGA 82";
     const aptoFixo = "AP-1108";
     
-    // Esconde o botão de baixar caso a pessoa rode o sorteio de novo
     document.getElementById('btnBaixar').style.display = 'none';
 
     // === SORTEIO GERAL ===
@@ -90,7 +89,6 @@ function realizarSorteio() {
     
     resultadoPCD.sort((a, b) => parseInt(a.vaga.replace("VAGA ", "")) - parseInt(b.vaga.replace("VAGA ", "")));
 
-    // Salva nas variáveis globais
     resultadoFinalGeral = resultadoGeral;
     resultadoFinalPCD = resultadoPCD;
 
@@ -119,7 +117,6 @@ function animarSorteio(dadosGerais, dadosPCD) {
     tabelaPCD.style.display = 'table';
     titulos.forEach(titulo => titulo.style.display = 'block');
 
-    // Preenche a tabela PCD com o efeito de giro
     dadosPCD.forEach(item => {
         const tr = document.createElement('tr');
         const tdVaga = document.createElement('td');
@@ -134,7 +131,6 @@ function animarSorteio(dadosGerais, dadosPCD) {
         corpoTabelaPCD.appendChild(tr);
     });
 
-    // Preenche a tabela Geral com o efeito de giro
     dadosGerais.forEach(item => {
         const tr = document.createElement('tr');
         const tdVaga = document.createElement('td');
@@ -157,12 +153,10 @@ function animarSorteio(dadosGerais, dadosPCD) {
     const velocidade = 50; 
 
     const roleta = setInterval(() => {
-        // Animação PCD
         celulasPCD.forEach(celula => {
             celula.textContent = apartamentosPCD[Math.floor(Math.random() * apartamentosPCD.length)];
         });
         
-        // Animação Geral
         celulasGerais.forEach(celula => {
             celula.textContent = apartamentos[Math.floor(Math.random() * apartamentos.length)];
         });
@@ -172,12 +166,10 @@ function animarSorteio(dadosGerais, dadosPCD) {
         if (tempoDecorrido >= tempoTotal) {
             clearInterval(roleta); 
             
-            // Fixa os resultados finais PCD
             celulasPCD.forEach((celula, index) => {
                 celula.textContent = dadosPCD[index].apto;
             });
 
-            // Fixa os resultados finais Gerais
             celulasGerais.forEach((celula, index) => {
                 celula.textContent = dadosGerais[index].apto;
             });
@@ -192,34 +184,37 @@ function animarSorteio(dadosGerais, dadosPCD) {
     }, velocidade);
 }
 
-// === NOVA FUNÇÃO PARA GERAR E BAIXAR O CSV ===
-// === NOVA FUNÇÃO PARA GERAR E BAIXAR O CSV ===
-function baixarCSV() {
-    // Adiciona o título com a vigência na primeira linha do Excel/CSV
-    let conteudoCSV = "SORTEIO (VIGENCIA DE 17 DE AGOSTO DE 2026 A 16 DE AGOSTO DE 2027)\n\n";
-    
-    // Cabeçalho das colunas
-    conteudoCSV += "Categoria;Vaga;Apartamento Sorteado\n";
+// === FUNÇÃO PARA GERAR E BAIXAR O EXCEL (.XLSX) ESTILIZADO ===
+function baixarExcel() {
+    const dadosParaExcel = [
+        ["RESIDENCIAL VIVA VISTA FERRAZ"],
+        ["SORTEIO (VIGENCIA DE 17 DE AGOSTO DE 2026 A 16 DE AGOSTO DE 2027)"],
+        [], 
+        ["--- VAGAS PCD ---"],
+        ["Vaga", "Apartamento Sorteado"]
+    ];
 
-    // Adiciona as vagas PCD
     resultadoFinalPCD.forEach(linha => {
-        conteudoCSV += `PCD;${linha.vaga};${linha.apto}\n`;
+        dadosParaExcel.push([linha.vaga, linha.apto]);
     });
 
-    // Adiciona as vagas gerais
+    dadosParaExcel.push([]);
+    dadosParaExcel.push(["--- VAGAS GERAIS ---"]);
+    dadosParaExcel.push(["Vaga", "Apartamento Sorteado"]);
+
     resultadoFinalGeral.forEach(linha => {
-        conteudoCSV += `Geral;${linha.vaga};${linha.apto}\n`;
+        dadosParaExcel.push([linha.vaga, linha.apto]);
     });
 
-    // Gera e baixa o arquivo
-    const blob = new Blob(["\uFEFF" + conteudoCSV], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "Resultado_Sorteio_Vagas_Viva_Vista.csv";
-    document.body.appendChild(link);
-    link.click();
-    
-    document.body.removeChild(link);
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(dadosParaExcel);
+
+    // Ajusta a largura das colunas do Excel
+    worksheet['!cols'] = [
+        { wch: 20 }, // Coluna A
+        { wch: 25 }  // Coluna B
+    ];
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Resultado Sorteio");
+    XLSX.writeFile(workbook, "Resultado_Sorteio_Vagas_Viva_Vista.xlsx");
 }
